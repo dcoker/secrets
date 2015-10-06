@@ -5,11 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/kms"
 )
 
-// Provider represents a service that can generate envelope keys and decrypt data encrypted with
-// those keys.
-type Provider interface {
-	GenerateEnvelopeKey(keyID string) (EnvelopeKey, error)
-	Decrypt(keyMetadata []byte) ([]byte, error)
+const (
+	kmsLabel = "kms"
+)
+
+func init() {
+	registry[kmsLabel] = NewKms
 }
 
 // Kms is a Provider for AWS KMS.
@@ -18,7 +19,7 @@ type Kms struct {
 }
 
 // NewKms returns a new Kms.
-func NewKms() *Kms {
+func NewKms() Provider {
 	return &Kms{kms.New(nil)}
 }
 
@@ -33,4 +34,9 @@ func (k *Kms) GenerateEnvelopeKey(keyID string) (EnvelopeKey, error) {
 func (k *Kms) Decrypt(keyCiphertext []byte) ([]byte, error) {
 	do, err := k.client.Decrypt(&kms.DecryptInput{CiphertextBlob: keyCiphertext})
 	return do.Plaintext, err
+}
+
+// Label returns kmsLabel
+func (k *Kms) Label() string {
+	return kmsLabel
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/dcoker/secrets/commands"
-	"github.com/dcoker/secrets/providers"
 	"github.com/dcoker/secrets/store"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -28,13 +27,12 @@ func main() {
 
 	behavior := kingpin.MustParse(app.Parse(os.Args[1:]))
 	filestore := store.NewFileStore(*filename)
-	kms := providers.NewKms()
 	var err error
 	switch behavior {
 	case readSpec.FullCommand():
-		err = readCommand.Run(filestore, kms)
+		err = readCommand.Run(filestore)
 	case writeSpec.FullCommand():
-		err = writeCommand.Run(filestore, kms)
+		err = writeCommand.Run(filestore)
 	case listSpec.FullCommand():
 		err = listCommand.Run(filestore)
 	}
