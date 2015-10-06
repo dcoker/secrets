@@ -13,7 +13,11 @@ import (
 
 func main() {
 	app := kingpin.New("secrets", string(MustAsset("docs/usage.txt")))
-	filename := app.Flag("filename", "Name of file to store encrypted secrets in.").Short('f').Required().String()
+	filename := app.Flag("filename", "Name of file to store encrypted secrets in.").
+		PlaceHolder("FILE").
+		Short('f').
+		Required().
+		String()
 	readSpec := app.Command("read", "Read a secret.")
 	writeSpec := app.Command("write", "Write a secret.")
 	listSpec := app.Command("list", "List secrets.")

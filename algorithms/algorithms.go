@@ -1,5 +1,7 @@
 package algorithms
 
+import "sort"
+
 var (
 	registry = make(map[string]func() Algorithm)
 )
@@ -31,5 +33,6 @@ func GetAlgorithms() []string {
 	for k := range registry {
 		algos = append(algos, k)
 	}
+	sort.Strings(algos)
 	return algos
 }
