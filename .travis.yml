@@ -1,8 +1,5 @@
-language: go
-
-go:
-  - 1.5
-
-go_import_path: github.com/dcoker/secrets
-
-install: make setup
+sudo: required
+services:
+  - docker
+script:
+  - make docker-build

@@ -14,9 +14,12 @@ build: docs.go test
 $(GLOCK):
 	go get -v github.com/robfig/glock
 
-.PHONY: setup
-setup: $(GLOCK)
+.PHONY: glock-sync
+glock-sync: $(GLOCK)
 	$(GLOCK) sync github.com/dcoker/secrets
+
+.PHONY: setup
+setup: $(GLOCK) glock-sync
 	$(GLOCK) install github.com/dcoker/secrets
 
 .PHONY: test

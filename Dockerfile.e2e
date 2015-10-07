@@ -1,5 +1,9 @@
 FROM golang:1.5
-ADD . src/github.com/dcoker/secrets
+ADD GLOCKFILE src/github.com/dcoker/secrets/
+ADD Makefile src/github.com/dcoker/secrets/
 WORKDIR src/github.com/dcoker/secrets
-RUN make setup
+RUN make glock-sync
+ADD . .
 RUN make build
+WORKDIR tests
+RUN ./tests.sh
