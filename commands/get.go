@@ -1,34 +1,26 @@
 package commands
 
 import (
-	"fmt"
-
 	"bytes"
-
+	"fmt"
 	"io/ioutil"
 
-	"errors"
-
 	"github.com/dcoker/secrets/algorithms"
-	"github.com/dcoker/secrets/providers"
+	"github.com/dcoker/secrets/keymanager"
 	"github.com/dcoker/secrets/store"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
-var (
-	errUnsupportedAlgorithm = errors.New("read: unsupported algorithm")
-)
-
-// Read implements the "read" command.
-type Read struct {
+// Get implements the "get" command.
+type Get struct {
 	format  *string
 	name    *string
 	writeTo *string
 }
 
-// NewRead returns a Read configured to receive parameters from kingpin.
-func NewRead(c *kingpin.CmdClause) *Read {
-	return &Read{
+// NewGet returns a Get configured to receive parameters from kingpin.
+func NewGet(c *kingpin.CmdClause) *Get {
+	return &Get{
 		name: c.Arg("name", "Name of the secret to read.").Required().String(),
 		writeTo: c.Flag("output", "Write to FILE instead of stdout.").
 			PlaceHolder("FILE").
@@ -38,18 +30,18 @@ func NewRead(c *kingpin.CmdClause) *Read {
 }
 
 // Run runs the command.
-func (r *Read) Run(database store.FileStore) error {
+func (r *Get) Run(database store.FileStore) error {
 	value, err := database.Get(*r.name)
 	if err != nil {
 		return err
 	}
-	algo := algorithms.New(value.Algorithm)
-	if algo == nil {
-		return errUnsupportedAlgorithm
+	algo, err := algorithms.New(value.Algorithm)
+	if err != nil {
+		return err
 	}
-	provider := providers.New(value.KeyProvider)
-	if provider == nil {
-		return errUnsupportedProvider
+	keyManager, err := keymanager.New(value.KeyManager)
+	if err != nil {
+		return err
 	}
 	var decryptionKeyArray [32]byte
 	if algo.NeedsKey() {
@@ -57,7 +49,7 @@ func (r *Read) Run(database store.FileStore) error {
 		if err2 != nil {
 			return err2
 		}
-		keyPlaintext, err2 := provider.Decrypt(keyCiphertext)
+		keyPlaintext, err2 := keyManager.Decrypt(keyCiphertext)
 		if err2 != nil {
 			return err2
 		}

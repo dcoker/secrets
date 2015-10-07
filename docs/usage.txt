@@ -5,23 +5,22 @@ ciphertexts are stored in a local YAML file.
 
 To store your first secret:
 
-	$ secrets -f frontend.yml -k arn:aws:kms:us-west...:key/24f... write db_username putin
+	$ secrets -f frontend.yml -k arn:aws:kms:us-west...:key/24f... put db_username putin
 	$ cat frontend.yml
 	db_username:
 		key_id: arn:aws:kms:us-west...:key/24f...
+		key_manager: kms
 		key_ciphertext: CiB9r3U+rrvEBKL/7ei...
 		algorithm: secretbox
 		ciphertext: ehPzEUMsRRP+...
 
 Optionally omit the key when storing subsequent secrets:
 
-	$ secrets -f frontend.yml write db_password 1234
+	$ secrets -f frontend.yml put db_password 1234
 
 To read secrets:
 
-	$ secrets -f frontend.yml read db_username
-	putin
-	$ secrets -f frontend.yml read db_password
+	$ secrets -f frontend.yml get db_password
 	1234
 
 Secrets are encrypted locally using secretbox (NaCl) or AES-GCM-256.

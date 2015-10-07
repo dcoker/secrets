@@ -1,4 +1,4 @@
-package providers
+package keymanager
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
@@ -13,13 +13,13 @@ func init() {
 	registry[kmsLabel] = NewKms
 }
 
-// Kms is a Provider for AWS KMS.
+// Kms is a KeyManager for AWS KMS.
 type Kms struct {
 	client *kms.KMS
 }
 
 // NewKms returns a new Kms.
-func NewKms() Provider {
+func NewKms() KeyManager {
 	return &Kms{kms.New(nil)}
 }
 

@@ -21,7 +21,8 @@ func TestAlgorithms(t *testing.T) {
 		if label == plaintextLabel {
 			continue
 		}
-		algo := New(label)
+		algo, err := New(label)
+		assert.NoError(t, err)
 		for _, expected := range testInputs {
 			ciphertext, err := algo.Encrypt(&key, []byte(expected))
 			if err != nil {

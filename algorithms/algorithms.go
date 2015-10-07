@@ -1,9 +1,13 @@
 package algorithms
 
-import "sort"
+import (
+	"errors"
+	"sort"
+)
 
 var (
-	registry = make(map[string]func() Algorithm)
+	registry                = make(map[string]func() Algorithm)
+	errUnsupportedAlgorithm = errors.New("algorithms: unsupported algorithm")
 )
 
 // Algorithm implementations encrypt and decrypt data.
@@ -15,11 +19,11 @@ type Algorithm interface {
 }
 
 // New returns an Algorithm corresponding to the requested cipher.
-func New(algorithm string) Algorithm {
+func New(algorithm string) (Algorithm, error) {
 	if constructor, present := registry[algorithm]; present {
-		return constructor()
+		return constructor(), nil
 	}
-	return nil
+	return nil, errUnsupportedAlgorithm
 }
 
 // GetDefaultAlgorithm returns the default algorithm.

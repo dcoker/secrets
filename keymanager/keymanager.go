@@ -1,26 +1,30 @@
-package providers
+package keymanager
 
-import "sort"
-
-var (
-	registry = make(map[string]func() Provider)
+import (
+	"errors"
+	"sort"
 )
 
-// New returns an Algorithm corresponding to the requested cipher.
-func New(label string) Provider {
+var (
+	registry                 = make(map[string]func() KeyManager)
+	errUnsupportedKeyManager = errors.New("keymanager: unsupported key manager")
+)
+
+// New returns a KeyManager of the requested type.
+func New(label string) (KeyManager, error) {
 	if constructor, present := registry[label]; present {
-		return constructor()
+		return constructor(), nil
 	}
-	return nil
+	return nil, errUnsupportedKeyManager
 }
 
-// GetDefaultProvider returns the default key provider label.
-func GetDefaultProvider() string {
+// GetDefaultKeyManager returns the default key managerlabel.
+func GetDefaultKeyManager() string {
 	return kmsLabel
 }
 
-// GetProviders returns a list of registered key providers.
-func GetProviders() []string {
+// GetKeyManagers returns a list of registered key managers.
+func GetKeyManagers() []string {
 	var collector []string
 	for k := range registry {
 		collector = append(collector, k)
@@ -29,9 +33,9 @@ func GetProviders() []string {
 	return collector
 }
 
-// Provider represents a service that can generate envelope keys and decrypt data encrypted with
-// those keys.
-type Provider interface {
+// KeyManager represents a service that can generate envelope keys and provide decryption
+// keys.
+type KeyManager interface {
 	GenerateEnvelopeKey(keyID string) (EnvelopeKey, error)
 	Decrypt(keyMetadata []byte) ([]byte, error)
 	Label() string
@@ -42,7 +46,7 @@ type EnvelopeKey struct {
 	// Plaintext is the plaintext encryption key.
 	Plaintext []byte
 	// Ciphertext is the ciphertext of the encryption key, encrypted with a key that is managed
-	// by the provider.
+	// by the key manager..
 	Ciphertext []byte
 }
 

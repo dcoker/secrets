@@ -17,21 +17,21 @@ func main() {
 		Short('f').
 		Required().
 		String()
-	readSpec := app.Command("read", "Read a secret.")
-	writeSpec := app.Command("write", "Write a secret.")
+	getSpec := app.Command("get", "Read a secret.")
+	putSpec := app.Command("put", "Write a secret.")
 	listSpec := app.Command("list", "List secrets.")
 
-	readCommand := commands.NewRead(readSpec)
-	writeCommand := commands.NewWrite(writeSpec)
+	getCommand := commands.NewGet(getSpec)
+	writeCommand := commands.NewPut(putSpec)
 	listCommand := commands.NewList()
 
 	behavior := kingpin.MustParse(app.Parse(os.Args[1:]))
 	filestore := store.NewFileStore(*filename)
 	var err error
 	switch behavior {
-	case readSpec.FullCommand():
-		err = readCommand.Run(filestore)
-	case writeSpec.FullCommand():
+	case getSpec.FullCommand():
+		err = getCommand.Run(filestore)
+	case putSpec.FullCommand():
 		err = writeCommand.Run(filestore)
 	case listSpec.FullCommand():
 		err = listCommand.Run(filestore)

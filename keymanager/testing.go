@@ -1,4 +1,4 @@
-package providers
+package keymanager
 
 import (
 	"bytes"
@@ -9,10 +9,10 @@ const (
 )
 
 func init() {
-	registry[testingLabel] = NewTestingProvider
+	registry[testingLabel] = newTestingKeyManager
 }
 
-// testingKeys is a key provider that uses a constant key. testingKeys is only to be used for
+// testingKeys is a key manager that uses a constant key. testingKeys is only to be used for
 // integration testing.
 type testingKeys struct{}
 
@@ -21,8 +21,8 @@ var (
 	testingCiphertext = bytes.Repeat([]byte{'y'}, 32)
 )
 
-// NewTestingProvider returns a new testingKeys.
-func NewTestingProvider() Provider {
+// NewTestingKeyManager returns a new testingKeys.
+func newTestingKeyManager() KeyManager {
 	return &testingKeys{}
 }
 

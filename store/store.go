@@ -84,8 +84,8 @@ type Value struct {
 	// KeyID of the key that this value is encrypted under. This identifies which key the
 	// Provider should use.
 	KeyID string `yaml:"key_id"`
-	// KeyProvider indicates which key provider provided this key.
-	KeyProvider string `yaml:"key_provider"`
+	// KeyManager indicates which key manager provided this key.
+	KeyManager string `yaml:"key_manager"`
 	// KeyCiphertext is the encryption key that Ciphertext is encrypted with, but encrypted with a
 	// key that only the Provider has.
 	KeyCiphertext string `yaml:"key_ciphertext"`
