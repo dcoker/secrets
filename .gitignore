@@ -157,4 +157,4 @@ Temporary Items
 .apdisk
 
 # Ignore any local secrets
-*.yml
+/*.yml
