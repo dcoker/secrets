@@ -8,7 +8,7 @@ export SECRETS=../../../../../bin/secrets
 ${SECRETS} --help 2>&1 | grep -q "managing secrets"
 ${SECRETS} 2>&1 | grep -q "required flag"
 
-# Verifies that empty files are handled correctly, 
+# Verifies that empty files are handled correctly,
 # and that we can read from a YML file.
 [[ "0" == "$(${SECRETS} -f /dev/null list | wc -l)" ]]
 ${SECRETS} -f does_not_exist.yml list && echo fail && exit 1 || /bin/true
@@ -20,34 +20,44 @@ ${SECRETS} -f does_not_exist.yml list && echo fail && exit 1 || /bin/true
 STORE=$(mktemp)
 TMPA=$(mktemp)
 TMPB=$(mktemp)
-rm -rf ${TMPA} ${TMPB} ${STORE}
-trap "rm -fr ${TMPA} ${TMPB} ${STORE}" EXIT
+function cleanup {
+  echo __ cleaning
+  rm -f "${TMPA}" "${TMPB}" "${STORE}"
+}
+cleanup
+trap "cleanup" EXIT
 
-# Verify that we can store and retrieve secrets.
-${SECRETS} -f ${STORE} put -p testing -k _ key1 value1
-${SECRETS} -f ${STORE} put -p testing key2 value2
-${SECRETS} -f ${STORE} put -p testing key3 value3
-echo value4 > ${TMPA}
-${SECRETS} -f ${STORE} put -p testing key4 -i ${TMPA}
-[[ "value1" == "$(${SECRETS} -f ${STORE} get key1)" ]] 
-[[ "value2" == "$(${SECRETS} -f ${STORE} get key2)" ]]
-[[ "value3" == "$(${SECRETS} -f ${STORE} get key3)" ]]
-[[ "value4" == "$(${SECRETS} -f ${STORE} get key4)" ]]
-${SECRETS} -f ${STORE} get key1 -o ${TMPA}
-[[ "value1" == "$(cat ${TMPA})" ]]
+# Verify that we can store and retrieve secrets with
+# various algorithms.
+for algo in none aesgcm256 secretbox; do
+  echo __ testing ${algo}
+  ${SECRETS} -f "${STORE}" put -a ${algo} -p testing -k _ key1 value1
+  ${SECRETS} -f "${STORE}" put -a ${algo} -p testing key2 value2
+  ${SECRETS} -f "${STORE}" put -a ${algo} -p testing key3 value3
+  echo value4 > "${TMPA}"
+  ${SECRETS} -f "${STORE}" put -a ${algo} -p testing key4 -i "${TMPA}"
+  [[ "value1" == "$(${SECRETS} -f "${STORE}" get key1)" ]]
+  [[ "value2" == "$(${SECRETS} -f "${STORE}" get key2)" ]]
+  [[ "value3" == "$(${SECRETS} -f "${STORE}" get key3)" ]]
+  [[ "value4" == "$(${SECRETS} -f "${STORE}" get key4)" ]]
+  ${SECRETS} -f "${STORE}" get key1 -o "${TMPA}"
+  [[ "value1" == "$(cat "${TMPA}")" ]]
+  cat "${STORE}"
+  cleanup
+done
 
 # Verify file IO works for larger text secrets.
-${SECRETS} -f ${STORE} put -p testing shellscript -i $0
-cmp $0 <(${SECRETS} -f ${STORE} get shellscript)
-${SECRETS} -f ${STORE} get shellscript -o ${TMPA}
-cmp ${TMPA} $0
+${SECRETS} -f "${STORE}" put -p testing -k _ shellscript -i "$0"
+cmp "$0" <(${SECRETS} -f "${STORE}" get shellscript)
+${SECRETS} -f "${STORE}" get shellscript -o "${TMPA}"
+cmp "${TMPA}" "$0"
 
 # Verify file IO works for larger binary secrets.
-gzip -c $0 > ${TMPA}
-${SECRETS} -f ${STORE} put -p testing binary -i ${TMPA}
-${SECRETS} -f ${STORE} get binary -o ${TMPB}
-cmp -s ${TMPA} ${TMPB}
-gzip -t ${TMPB}
+gzip -c "$0" > "${TMPA}"
+${SECRETS} -f "${STORE}" put -p testing -k _ binary -i "${TMPA}"
+${SECRETS} -f "${STORE}" get binary -o "${TMPB}"
+cmp -s "${TMPA}" "${TMPB}"
+gzip -t "${TMPB}"
 
 # Verify that JSON support works.
 [[ "1" == "$(${SECRETS} -f single.json list | wc -l)" ]]
