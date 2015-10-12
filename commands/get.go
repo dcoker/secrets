@@ -39,12 +39,13 @@ func (r *Get) Run(database store.FileStore) error {
 	if err != nil {
 		return err
 	}
-	keyManager, err := keymanager.New(value.KeyManager)
-	if err != nil {
-		return err
-	}
 	var decryptionKeyArray [32]byte
 	if algo.NeedsKey() {
+		keyManager, err := keymanager.New(value.KeyManager)
+		if err != nil {
+			return err
+		}
+
 		keyCiphertext, err2 := value.GetKeyCiphertext()
 		if err2 != nil {
 			return err2

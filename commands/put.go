@@ -33,7 +33,6 @@ var (
 	errConflictingValue = errors.New(
 		"Please specify either a secret in a positional argument, or use --from-file, " +
 			"but not both.")
-	errUnsupportedProvider = errors.New("Unsupported key manager.")
 )
 
 // NewPut returns a Put configured to receive parameters from kingpin.
@@ -60,40 +59,44 @@ func NewPut(c *kingpin.CmdClause) *Put {
 
 // Run runs the command.
 func (w *Put) Run(database store.FileStore) error {
-	keyManager, err := keymanager.New(*w.keyManager)
+	var value store.Value
+	algo, err := algorithms.New(*w.algo)
 	if err != nil {
 		return err
 	}
+	value.Algorithm = algo.Label()
+
+	var envelopeKey keymanager.EnvelopeKey
+	if algo.NeedsKey() {
+		keyManager, err := keymanager.New(*w.keyManager)
+		if err != nil {
+			return err
+		}
+		value.KeyManager = keyManager.Label()
+
+		if err := w.chooseKeyID(database); err != nil {
+			return err
+		}
+		value.KeyID = *w.keyID
+
+		envelopeKey, err = keyManager.GenerateEnvelopeKey(*w.keyID)
+		if err != nil {
+			return err
+		}
+		value.KeyCiphertext = base64.StdEncoding.EncodeToString(envelopeKey.Ciphertext)
+	}
+
 	plaintext, err := w.choosePlaintext()
 	if err != nil {
 		return err
 	}
-	if err := w.chooseKeyID(database); err != nil {
-		return err
-	}
 
-	envelopeKey, err := keyManager.GenerateEnvelopeKey(*w.keyID)
+	ciphertext, err := algo.Encrypt(envelopeKey.GetPlaintext32(), plaintext)
 	if err != nil {
 		return err
 	}
+	value.Ciphertext = base64.StdEncoding.EncodeToString(ciphertext)
 
-	box, err := algorithms.New(*w.algo)
-	if err != nil {
-		return err
-	}
-	ciphertext, err := box.Encrypt(envelopeKey.GetPlaintext32(), plaintext)
-	if err != nil {
-		return err
-	}
-	encoded := base64.StdEncoding.EncodeToString(ciphertext)
-
-	value := store.Value{
-		Algorithm:     box.Label(),
-		KeyID:         *w.keyID,
-		KeyManager:    keyManager.Label(),
-		KeyCiphertext: base64.StdEncoding.EncodeToString(envelopeKey.Ciphertext),
-		Ciphertext:    encoded,
-	}
 	return database.Put(*w.name, value)
 }
 

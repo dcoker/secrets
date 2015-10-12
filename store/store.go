@@ -83,12 +83,12 @@ func (f FileStore) GetKeyIds() (map[string]int, error) {
 type Value struct {
 	// KeyID of the key that this value is encrypted under. This identifies which key the
 	// Provider should use.
-	KeyID string `yaml:"key_id"`
+	KeyID string `yaml:"key_id,omitempty"`
 	// KeyManager indicates which key manager provided this key.
-	KeyManager string `yaml:"key_manager"`
+	KeyManager string `yaml:"key_manager,omitempty"`
 	// KeyCiphertext is the encryption key that Ciphertext is encrypted with, but encrypted with a
 	// key that only the Provider has.
-	KeyCiphertext string `yaml:"key_ciphertext"`
+	KeyCiphertext string `yaml:"key_ciphertext,omitempty"`
 	// Algorithm used to populate Ciphertext.
 	Algorithm string `yaml:"algorithm"`
 	// Ciphertext is the plaintext encrypted with the ephemeral key.
