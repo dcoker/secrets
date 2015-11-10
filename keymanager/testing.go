@@ -27,7 +27,7 @@ func newTestingKeyManager() KeyManager {
 }
 
 // GenerateEnvelopeKey generates an EnvelopeKey under a specific KeyID.
-func (k *testingKeys) GenerateEnvelopeKey(keyID string) (EnvelopeKey, error) {
+func (k *testingKeys) GenerateEnvelopeKey(keyID, secretID string) (EnvelopeKey, error) {
 	return EnvelopeKey{
 		testingPlaintext,
 		testingCiphertext,
@@ -35,7 +35,7 @@ func (k *testingKeys) GenerateEnvelopeKey(keyID string) (EnvelopeKey, error) {
 }
 
 // Decrypt decrypts the encrypted key.
-func (k *testingKeys) Decrypt(keyCiphertext []byte) ([]byte, error) {
+func (k *testingKeys) Decrypt(keyCiphertext []byte, secretID string) ([]byte, error) {
 	return testingPlaintext, nil
 }
 

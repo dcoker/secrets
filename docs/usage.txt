@@ -1,7 +1,7 @@
 A CLI for managing secrets.
 
-Secrets are encrypted with an ephemeral key managed by KMS. The
-ciphertexts are stored in a local YAML file.
+Secrets are encrypted with an ephemeral key managed by KMS. The ciphertexts are stored in a local
+YAML file that is safe to distribute in source control, deployments, CI systems, etc.
 
 To store your first secret:
 
@@ -25,10 +25,18 @@ To read secrets:
 
 Secrets are encrypted locally using secretbox (NaCl) or AES-GCM-256.
 
-Policies or Grants attached to KMS keys determine which IAM users or
-roles are allowed to perform encryption and decryption operations under a
-specific key. Writing secrets requires kms:GenerateDataKey and reading secrets
-requires kms:Decrypt. All KMS operations are logged to CloudTrail.
+Policies or Grants attached to KMS keys determine which IAM users or roles are allowed to perform
+encryption and decryption operations under a specific key. Writing secrets requires
+kms:GenerateDataKey, and reading secrets requires kms:Decrypt.
+
+Secrets are encrypted with an EncryptionContext of {"SecretId": name}, which allows fine-grained
+grants restricted to specific secrets rather than to all secrets encrypted under a key. This example
+creates a grant allowing an ARN (such as an IAM Role or user) to decrypt only a single value:
+
+    $ aws kms create-grant --key-id ${KEY_ID} --grantee-principal ${ARN} \
+        --operations Decrypt --constraints EncryptionContextSubset={SecretId=db_password}
+
+All KMS operations are logged to CloudTrail (if enabled).
 
 Depending on your particular AWS configuration, you may need to set the
 AWS_REGION or AWS_PROFILE environment variables.

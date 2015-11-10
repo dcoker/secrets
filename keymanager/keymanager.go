@@ -36,8 +36,8 @@ func GetKeyManagers() []string {
 // KeyManager represents a service that can generate envelope keys and provide decryption
 // keys.
 type KeyManager interface {
-	GenerateEnvelopeKey(keyID string) (EnvelopeKey, error)
-	Decrypt(keyMetadata []byte) ([]byte, error)
+	GenerateEnvelopeKey(keyID, secretID string) (EnvelopeKey, error)
+	Decrypt(keyMetadata []byte, secretID string) ([]byte, error)
 	Label() string
 }
 

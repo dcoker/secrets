@@ -79,7 +79,7 @@ func (w *Put) Run(database store.FileStore) error {
 		}
 		value.KeyID = *w.keyID
 
-		envelopeKey, err = keyManager.GenerateEnvelopeKey(*w.keyID)
+		envelopeKey, err = keyManager.GenerateEnvelopeKey(*w.keyID, *w.name)
 		if err != nil {
 			return err
 		}

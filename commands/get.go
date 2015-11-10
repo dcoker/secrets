@@ -50,7 +50,7 @@ func (r *Get) Run(database store.FileStore) error {
 		if err2 != nil {
 			return err2
 		}
-		keyPlaintext, err2 := keyManager.Decrypt(keyCiphertext)
+		keyPlaintext, err2 := keyManager.Decrypt(keyCiphertext, *r.name)
 		if err2 != nil {
 			return err2
 		}
