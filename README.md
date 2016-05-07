@@ -1,8 +1,21 @@
-# Secrets
+# Notice!
 
-[![Build Status](https://travis-ci.org/dcoker/secrets.svg)](https://travis-ci.org/dcoker/secrets)
+Secrets has been replaced by https://github.com/dcoker/biscuit.  
 
-Secrets is a simple CLI tool for securely managing secrets used in AWS
-deployments.
+If you are a current user of Secrets, know that Biscuit provides the same functionality and more, including multi-region support. Your existing .yml files can be migrated simply by converting the values of the YAML dictionaries into a list instead of scalars. 
 
-See docs/usage.txt for more information, and [secrets-java](https://github.com/dcoker/secrets-java) for supporting Java libraries.
+For example, change this:
+
+```
+password:
+  key_id: ...
+  key_ciphertext: ...
+```
+
+to:
+
+```
+password:
+- key_id: ...
+  key_ciphertext: ...
+```
